@@ -436,3 +436,33 @@ const char *kana_key_cap(int key, bool katakana) {
 	snprintf(cap, sizeof(cap), "%s", kana_key_step(key, 0, katakana));
 	return cap;
 }
+
+// ---------------------------------------------------------------------------
+// Flicking a key
+// ---------------------------------------------------------------------------
+
+kana_dir_t kana_flick_dir(int dx, int dy, int threshold) {
+	int ax = dx < 0 ? -dx : dx;
+	int ay = dy < 0 ? -dy : dy;
+	if (ax < threshold && ay < threshold) {
+		return KANA_DIR_CENTER;
+	}
+	if (ax > ay) {
+		return dx < 0 ? KANA_DIR_LEFT : KANA_DIR_RIGHT;
+	}
+	return dy < 0 ? KANA_DIR_UP : KANA_DIR_DOWN;
+}
+
+const char *kana_flick_step(int key, kana_dir_t dir, bool katakana) {
+	// The row's order is centre, left, up, right, down. The や key (7) has
+	// only three kana, and they go to the centre, up and down.
+	int index = (int)dir;
+	if (key == 7) {
+		index = dir == KANA_DIR_CENTER ? 0 : dir == KANA_DIR_UP ? 1 : dir == KANA_DIR_DOWN ? 2 : -1;
+	}
+	if (index < 0) {
+		static char none[1] = "";
+		return none;
+	}
+	return kana_key_step(key, index, katakana); // "" for a step the row does not have
+}
