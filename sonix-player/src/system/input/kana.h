@@ -103,4 +103,32 @@ const char *kana_key_step(int key, int tap, bool katakana);
 // What the key is labelled with: its first kana, or 、。 for the punctuation key.
 const char *kana_key_cap(int key, bool katakana);
 
+// ---------------------------------------------------------------------------
+// Flicking a key of the ten-key keypad
+//
+// The finger goes down on a key and slides before it lifts: the kana of the
+// direction is written instead of the key being tapped. The same order as the
+// row of the key, as on a Japanese phone: centre あ, left い, up う, right え,
+// down お. The や key has three kana: centre や, up ゆ, down よ. The わ key:
+// centre わ, left を, up ん, right ー.
+// ---------------------------------------------------------------------------
+
+typedef enum {
+	KANA_DIR_CENTER = 0, // a tap, or a slide shorter than the threshold
+	KANA_DIR_LEFT,
+	KANA_DIR_UP,
+	KANA_DIR_RIGHT,
+	KANA_DIR_DOWN,
+} kana_dir_t;
+
+// The direction of a slide of (dx, dy) pixels (y grows downwards). Anything that
+// stays within `threshold` pixels on both axes is KANA_DIR_CENTER; otherwise the
+// longer axis wins.
+kana_dir_t kana_flick_dir(int dx, int dy, int threshold);
+
+// The kana of key `key` for a flick in direction `dir`, as hiragana or katakana.
+// "" when the key has none there (and for the mark key). The text is in a buffer
+// that the next call overwrites, like kana_key_step().
+const char *kana_flick_step(int key, kana_dir_t dir, bool katakana);
+
 #endif /* KANA_H */
